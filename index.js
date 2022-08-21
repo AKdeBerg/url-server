@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const multer  = require('multer')
 const cors = require('cors');
 
@@ -6,9 +7,42 @@ const app = express();
 const port = 4000;
 const UPLOAD_FOLDER = './uploads';
 
+
+
 // multer
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, UPLOAD_FOLDER);
+    },
+    filename: (req, file, cb) => {
+        // extract the file extension
+        const fileExt = path.extname(file.originalname);
+        // modify filename
+        const fileName = file.originalname
+            .replace(fileExt, '')
+            .toLowerCase()
+            .split(' ')
+            .join('-') + '-' + Date.now();
+        
+        cb(null, fileName + fileExt)
+    },
+});
+
+
 const upload = multer({ 
-    dest: UPLOAD_FOLDER
+    storage: storage,
+    limits: {
+        fileSize: 2000000, // 2 MB
+    },
+    fileFilter: (req, file, cb) => {
+        if(file.mimetype === 'text/csv' || ile.mimetype === 'application/zip') {
+            cb(null, true);
+        } else {
+            cb(new Error("Only .csv and .zip files are allowed!"))
+        }
+        console.log(file) 
+    }
+
 })
 
 // middleware
@@ -21,6 +55,15 @@ app.get('/', cors(), (req, res) => {
 
 app.post('/upload', cors(), upload.single('file'), (req, res) => {
     res.send('I have receive your req');
+});
+
+// defaulr error handler
+app.use((err, req, res, next) => {
+    if(err) {
+        res.status(500).send(err.message);
+    } else {
+        res.send("success")
+    }
 });
 
 app.listen(port, () => {
