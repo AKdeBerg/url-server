@@ -35,14 +35,12 @@ const upload = multer({
         fileSize: 2000000, // 2 MB
     },
     fileFilter: (req, file, cb) => {
-        if(file.mimetype === 'text/csv' || ile.mimetype === 'application/zip') {
+        if(file.mimetype === 'text/csv' || file.mimetype === 'application/zip') {
             cb(null, true);
         } else {
             cb(new Error("Only .csv and .zip files are allowed!"))
         }
-        console.log(file) 
     }
-
 })
 
 // middleware
@@ -54,12 +52,13 @@ app.get('/', cors(), (req, res) => {
 });
 
 app.post('/upload', cors(), upload.single('file'), (req, res) => {
-    res.send('I have receive your req');
+    res.send('The file has been uploaded successfully');
 });
 
 // defaulr error handler
 app.use((err, req, res, next) => {
     if(err) {
+        console.log('The erro is ', err)
         res.status(500).send(err.message);
     } else {
         res.send("success")
