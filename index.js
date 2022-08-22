@@ -2,6 +2,8 @@ const express = require('express');
 const path = require('path');
 const multer  = require('multer')
 const cors = require('cors');
+const mysql = require('mysql');
+require('dotenv').config();
 
 const app = express();
 const port = 4000;
@@ -41,6 +43,21 @@ const upload = multer({
             cb(new Error("Only .csv and .zip files are allowed!"))
         }
     }
+});
+
+// my sql pool
+const pool = mysql.createPool({
+    connectionLimit: 100,
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS,
+    database: process.env.DB_NAME
+});
+
+// connection
+pool.getConnection((err, connection) => {
+    if(err) throw err;
+    console.log('Connected as ID ' + connection.threadId);
 })
 
 // middleware
